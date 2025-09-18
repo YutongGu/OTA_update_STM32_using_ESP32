@@ -78,12 +78,19 @@ esp_err_t readTask(uint8_t *data_buff, size_t data_len)
     return ESP_OK;
 }
 
-esp_err_t flashSTM(uint8_t *data_buff, size_t data_len)
-{
+esp_err_t flashSTM(
+    uint8_t *data_buff,
+    size_t data_len,
+    gpio_num_t reset_pin,
+    gpio_num_t boot0_pin,
+    uart_port_t uart_port,
+    gpio_num_t txd_pin,
+    gpio_num_t rxd_pin
+) {
     esp_err_t err = ESP_FAIL;
 
-    initGPIO(GPIO_NUM_NC, GPIO_NUM_NC);
-    initFlashUART(UART_NUM_MAX, GPIO_NUM_NC, GPIO_NUM_NC);
+    initGPIO(reset_pin, boot0_pin);
+    initFlashUART(uart_port, txd_pin, rxd_pin);
 
     err = writeTask(data_buff, data_len);
     if (err != ESP_OK)

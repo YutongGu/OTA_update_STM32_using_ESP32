@@ -34,9 +34,22 @@ esp_err_t readTask(uint8_t *data_buff, size_t data_len);
  * 
  * @param data_buff Data buffer to be flashed
  * @param data_len Length of the data buffer
+ * @param reset_pin Reset pin of the STM32
+ * @param boot0_pin Boot0 pin of the STM32
+ * @param uart_port UART port of the ESP32
+ * @param txd_pin TXD pin of the ESP32
+ * @param rxd_pin RXD pin of the ESP32
  *   
  * @return ESP_OK - success, ESP_FAIL - failed
  */
-esp_err_t flashSTM(uint8_t *data_buff, size_t data_len);
+esp_err_t flashSTM(
+    uint8_t *data_buff,
+    size_t data_len,
+    gpio_num_t reset_pin,
+    gpio_num_t boot0_pin,
+    uart_port_t uart_port,
+    gpio_num_t txd_pin,
+    gpio_num_t rxd_pin
+);
 
 #endif
