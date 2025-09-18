@@ -105,6 +105,7 @@ esp_err_t flashSTM(
     }
 
     ESP_LOGI(TAG_STM_FLASH, "%s", "Ending Connection");
+    deinitFlashUART();
     endConn();
 
     return err;

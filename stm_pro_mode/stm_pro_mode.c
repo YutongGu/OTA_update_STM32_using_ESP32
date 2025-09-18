@@ -27,6 +27,12 @@ void initFlashUART(uart_port_t uart_port, gpio_num_t txd_pin, gpio_num_t rxd_pin
     ESP_LOGI(TAG_STM_PRO, "%s", "Initialized Flash UART");
 }
 
+void deinitFlashUART(void)
+{
+    uart_driver_delete(g_uart_port);
+    g_uart_port = UART_NUM_MAX;
+}
+
 void initGPIO(gpio_num_t reset_pin, gpio_num_t boot0_pin)
 {
     g_reset_pin = reset_pin;

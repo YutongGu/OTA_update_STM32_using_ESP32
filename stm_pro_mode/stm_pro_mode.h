@@ -38,6 +38,9 @@
 //Initialize UART functionalities
 void initFlashUART(uart_port_t uart_port, gpio_num_t txd_pin, gpio_num_t rxd_pin);
 
+//Deinitialize UART functionalities
+void deinitFlashUART(void);
+
 //Initialize GPIO functionalities
 void initGPIO(gpio_num_t reset_pin, gpio_num_t boot0_pin);
 
