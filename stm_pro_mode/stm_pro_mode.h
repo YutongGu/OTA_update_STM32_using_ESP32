@@ -26,28 +26,20 @@
 //Macro for error checking
 #define IS_ESP_OK(x) if ((x) != ESP_OK) break;
 
-#define TXD_PIN (GPIO_NUM_4) //(GPIO_NUM_1)
-#define RXD_PIN (GPIO_NUM_5) //(GPIO_NUM_3)
 #define UART_BAUD_RATE 115200
 #define UART_BUF_SIZE 1024
-#define UART_CONTROLLER UART_NUM_1
 
-#define RESET_PIN (GPIO_NUM_19) //(GPIO_NUM_12)
-#define BOOT0_PIN (GPIO_NUM_21) //(GPIO_NUM_2)
 #define HIGH 1
 #define LOW 0
 
 #define ACK 0x79
 #define SERIAL_TIMEOUT 5000
 
-#define FILE_PATH_MAX 128
-#define BASE_PATH "/spiffs/"
-
 //Initialize UART functionalities
-void initFlashUART(void);
+void initFlashUART(uart_port_t uart_port, gpio_num_t txd_pin, gpio_num_t rxd_pin);
 
 //Initialize GPIO functionalities
-void initGPIO(void);
+void initGPIO(gpio_num_t reset_pin, gpio_num_t boot0_pin);
 
 //Reset the STM32Fxx
 void resetSTM(void);

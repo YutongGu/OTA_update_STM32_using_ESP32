@@ -2,8 +2,13 @@
 
 static const char *TAG_STM_PRO = "stm_pro_mode";
 
+static gpio_num_t g_reset_pin = GPIO_NUM_NC;
+static gpio_num_t g_boot0_pin = GPIO_NUM_NC;
+
+static uart_port_t g_uart_port = UART_NUM_MAX;
+
 //Functions for custom adjustments
-void initFlashUART(void)
+void initFlashUART(uart_port_t uart_port, gpio_num_t txd_pin, gpio_num_t rxd_pin)
 {
     const uart_config_t uart_config = {
         .baud_rate = UART_BAUD_RATE,
@@ -12,20 +17,25 @@ void initFlashUART(void)
         .stop_bits = UART_STOP_BITS_1,
         .flow_ctrl = UART_HW_FLOWCTRL_DISABLE};
 
-    uart_driver_install(UART_CONTROLLER, UART_BUF_SIZE * 2, 0, 0, NULL, 0);
+    g_uart_port = uart_port;
 
-    uart_param_config(UART_CONTROLLER, &uart_config);
-    uart_set_pin(UART_CONTROLLER, TXD_PIN, RXD_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
+    uart_driver_install(g_uart_port, UART_BUF_SIZE * 2, 0, 0, NULL, 0);
+
+    uart_param_config(g_uart_port, &uart_config);
+    uart_set_pin(g_uart_port, txd_pin, rxd_pin, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
 
     ESP_LOGI(TAG_STM_PRO, "%s", "Initialized Flash UART");
 }
 
-void initGPIO(void)
+void initGPIO(gpio_num_t reset_pin, gpio_num_t boot0_pin)
 {
-    gpio_set_direction(RESET_PIN, GPIO_MODE_OUTPUT);
-    gpio_set_level(RESET_PIN, HIGH);
-    gpio_set_direction(BOOT0_PIN, GPIO_MODE_OUTPUT);
-    gpio_set_level(BOOT0_PIN, HIGH);
+    g_reset_pin = reset_pin;
+    g_boot0_pin = boot0_pin;
+
+    gpio_set_direction(g_reset_pin, GPIO_MODE_OUTPUT);
+    gpio_set_level(g_reset_pin, HIGH);
+    gpio_set_direction(g_boot0_pin, GPIO_MODE_OUTPUT);
+    gpio_set_level(g_boot0_pin, HIGH);
 
     ESP_LOGI(TAG_STM_PRO, "%s", "GPIO Initialized");
 }
@@ -34,9 +44,9 @@ void resetSTM(void)
 {
     ESP_LOGI(TAG_STM_PRO, "%s", "Starting RESET Procedure");
 
-    gpio_set_level(RESET_PIN, LOW);
+    gpio_set_level(g_reset_pin, LOW);
     vTaskDelay(100 / portTICK_PERIOD_MS);
-    gpio_set_level(RESET_PIN, HIGH);
+    gpio_set_level(g_reset_pin, HIGH);
     vTaskDelay(500 / portTICK_PERIOD_MS);
 
     ESP_LOGI(TAG_STM_PRO, "%s", "Finished RESET Procedure");
@@ -44,8 +54,8 @@ void resetSTM(void)
 
 void endConn(void)
 {
-    gpio_set_level(RESET_PIN, LOW);
-    gpio_set_level(BOOT0_PIN, LOW);
+    gpio_set_level(g_reset_pin, LOW);
+    gpio_set_level(g_boot0_pin, LOW);
 
     resetSTM();
 
@@ -166,7 +176,7 @@ int sendBytes(const char *bytes, int count, int resp)
     if (length > 0)
     {
         uint8_t data[length];
-        const int rxBytes = uart_read_bytes(UART_CONTROLLER, data, length, 1000 / portTICK_PERIOD_MS);
+        const int rxBytes = uart_read_bytes(g_uart_port, data, length, 1000 / portTICK_PERIOD_MS);
 
         if (rxBytes > 0 && data[0] == ACK)
         {
@@ -191,7 +201,7 @@ int sendBytes(const char *bytes, int count, int resp)
 
 int sendData(const char *logName, const char *data, const int count)
 {
-    const int txBytes = uart_write_bytes(UART_CONTROLLER, data, count);
+    const int txBytes = uart_write_bytes(g_uart_port, data, count);
     //ESP_LOGD(logName, "Wrote %d bytes", count);
     return txBytes;
 }
@@ -202,7 +212,7 @@ int waitForSerialData(int dataCount, int timeout)
     int length = 0;
     while (timer < timeout)
     {
-        uart_get_buffered_data_len(UART_CONTROLLER, (size_t *)&length);
+        uart_get_buffered_data_len(g_uart_port, (size_t *)&length);
         if (length >= dataCount)
         {
             return length;
@@ -255,7 +265,7 @@ esp_err_t flashPage(const char *address, const char *data)
     if (length > 0)
     {
         uint8_t data[length];
-        const int rxBytes = uart_read_bytes(UART_CONTROLLER, data, length, 1000 / portTICK_PERIOD_MS);
+        const int rxBytes = uart_read_bytes(g_uart_port, data, length, 1000 / portTICK_PERIOD_MS);
         if (rxBytes > 0 && data[0] == ACK)
         {
             ESP_LOGI(TAG_STM_PRO, "%s", "Flash Success");
@@ -288,7 +298,7 @@ esp_err_t readPage(const char *address, const char *data)
     if (length > 0)
     {
         uint8_t uart_data[length];
-        const int rxBytes = uart_read_bytes(UART_NUM_1, uart_data, length, 1000 / portTICK_PERIOD_MS);
+        const int rxBytes = uart_read_bytes(g_uart_port, uart_data, length, 1000 / portTICK_PERIOD_MS);
 
         if (rxBytes > 0 && uart_data[0] == 0x79)
         {
