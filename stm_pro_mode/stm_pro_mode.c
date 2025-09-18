@@ -166,7 +166,7 @@ int sendBytes(const char *bytes, int count, int resp)
     if (length > 0)
     {
         uint8_t data[length];
-        const int rxBytes = uart_read_bytes(UART_CONTROLLER, data, length, 1000 / portTICK_RATE_MS);
+        const int rxBytes = uart_read_bytes(UART_CONTROLLER, data, length, 1000 / portTICK_PERIOD_MS);
 
         if (rxBytes > 0 && data[0] == ACK)
         {
@@ -255,7 +255,7 @@ esp_err_t flashPage(const char *address, const char *data)
     if (length > 0)
     {
         uint8_t data[length];
-        const int rxBytes = uart_read_bytes(UART_CONTROLLER, data, length, 1000 / portTICK_RATE_MS);
+        const int rxBytes = uart_read_bytes(UART_CONTROLLER, data, length, 1000 / portTICK_PERIOD_MS);
         if (rxBytes > 0 && data[0] == ACK)
         {
             ESP_LOGI(TAG_STM_PRO, "%s", "Flash Success");
@@ -288,7 +288,7 @@ esp_err_t readPage(const char *address, const char *data)
     if (length > 0)
     {
         uint8_t uart_data[length];
-        const int rxBytes = uart_read_bytes(UART_NUM_1, uart_data, length, 1000 / portTICK_RATE_MS);
+        const int rxBytes = uart_read_bytes(UART_NUM_1, uart_data, length, 1000 / portTICK_PERIOD_MS);
 
         if (rxBytes > 0 && uart_data[0] == 0x79)
         {
