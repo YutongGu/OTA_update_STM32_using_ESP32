@@ -35,6 +35,10 @@
 #define ACK 0x79
 #define SERIAL_TIMEOUT 5000
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 //Initialize UART functionalities
 void initFlashUART(uart_port_t uart_port, gpio_num_t txd_pin, gpio_num_t rxd_pin);
 
@@ -97,5 +101,9 @@ esp_err_t flashPage(const char *address, const char *data);
 
 //UART read the flash memory address of the STM32Fxx and verify with the given block of data 
 esp_err_t readPage(const char *address, const char *data);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

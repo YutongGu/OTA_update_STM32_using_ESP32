@@ -16,7 +16,7 @@ esp_err_t writeTask(uint8_t *data_buff, size_t data_len)
     int data_remaining = data_len;
     while (data_remaining > 0)
     {
-        int bytes_to_write = min(data_remaining, 256);
+        int bytes_to_write = data_remaining < 256 ? data_remaining : 256;
         if (bytes_to_write == 0) break;
 
         memcpy(block, data_buff + offset, bytes_to_write);
@@ -53,7 +53,7 @@ esp_err_t readTask(uint8_t *data_buff, size_t data_len)
     int data_remaining = data_len;
     while (data_remaining > 0)
     {
-        int bytes_to_read = max(data_remaining, 256);
+        int bytes_to_read = data_remaining < 256 ? data_remaining : 256;
         if (bytes_to_read == 0) break;
 
         memcpy(block, data_buff + offset, bytes_to_read);

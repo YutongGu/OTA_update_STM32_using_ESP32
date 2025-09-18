@@ -3,6 +3,10 @@
 
 #include "stm_pro_mode.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief Write the code into the flash memory of STM32Fxx
  * 
@@ -51,5 +55,9 @@ esp_err_t flashSTM(
     gpio_num_t txd_pin,
     gpio_num_t rxd_pin
 );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

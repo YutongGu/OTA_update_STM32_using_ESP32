@@ -2,10 +2,10 @@
 
 static const char *TAG_STM_PRO = "stm_pro_mode";
 
-static gpio_num_t g_reset_pin = GPIO_NUM_NC;
-static gpio_num_t g_boot0_pin = GPIO_NUM_NC;
+static volatile gpio_num_t g_reset_pin = GPIO_NUM_NC;
+static volatile gpio_num_t g_boot0_pin = GPIO_NUM_NC;
 
-static uart_port_t g_uart_port = UART_NUM_MAX;
+static volatile uart_port_t g_uart_port = UART_NUM_MAX;
 
 //Functions for custom adjustments
 void initFlashUART(uart_port_t uart_port, gpio_num_t txd_pin, gpio_num_t rxd_pin)
@@ -38,10 +38,25 @@ void initGPIO(gpio_num_t reset_pin, gpio_num_t boot0_pin)
     g_reset_pin = reset_pin;
     g_boot0_pin = boot0_pin;
 
-    gpio_set_direction(g_reset_pin, GPIO_MODE_OUTPUT);
+    gpio_config_t config;
+    config.pin_bit_mask = 1ULL << g_reset_pin;
+    config.mode = GPIO_MODE_OUTPUT;
+    config.pull_up_en = GPIO_PULLUP_DISABLE;
+    config.pull_down_en = GPIO_PULLDOWN_DISABLE;
+    config.intr_type = GPIO_INTR_DISABLE;
+    gpio_config(&config);
     gpio_set_level(g_reset_pin, HIGH);
-    gpio_set_direction(g_boot0_pin, GPIO_MODE_OUTPUT);
+    ESP_LOGI(TAG_STM_PRO, "Reset pin %d set to HIGH", g_reset_pin);
+    
+    config.pin_bit_mask = 1ULL << g_boot0_pin;
+    config.mode = GPIO_MODE_OUTPUT;
+    config.pull_up_en = GPIO_PULLUP_DISABLE;
+    config.pull_down_en = GPIO_PULLDOWN_DISABLE;
+    config.intr_type = GPIO_INTR_DISABLE;
+
+    gpio_config(&config);
     gpio_set_level(g_boot0_pin, HIGH);
+    ESP_LOGI(TAG_STM_PRO, "Boot0 pin %d set to HIGH", g_boot0_pin);
 
     ESP_LOGI(TAG_STM_PRO, "%s", "GPIO Initialized");
 }
